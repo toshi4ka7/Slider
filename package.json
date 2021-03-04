@@ -1,0 +1,20 @@
+{
+  "name": "Slider",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toshi4ka7/Slider.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/toshi4ka7/Slider/issues"
+  },
+  "homepage": "https://github.com/toshi4ka7/Slider#readme"
+}
