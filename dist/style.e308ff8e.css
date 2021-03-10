@@ -31,12 +31,25 @@ body {
   height: 100%;
 }
 .slider__item {
-  flex: 0 0 50%;
-  max-width: 50%;
+  flex: 0 0 33.3333%;
+  max-width: 33.3333%;
   background-color: rgb(67, 152, 250);
 }
 .slider__item:nth-child(2n + 1) {
   background-color: rgb(150, 197, 252);
+}
+
+@media only screen and (max-width: 800px) {
+  .slider__item {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+@media only screen and (max-width: 500px) {
+  .slider__item {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
 }
 
 /* Addition styles for slider__item */
@@ -67,6 +80,51 @@ body {
 }
 .slider__control .fas:hover {
   color: tomato;
+}
+.slider__control .disabled {
+  color: #ccc;
+}
+.slider__control .disabled:hover {
+  color: #ccc;
+}
+
+.pagination {
+  display: flex;
+  list-style: none;
+  justify-content: center;
+  margin-top: 20px;
+}
+.pagination__item {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #ccc;
+  transition: all 0.3s;
+  margin: 0 3px;
+}
+.pagination__item.active {
+  background-color: rgb(75, 75, 75);
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 50px;
+}
+.container .fas {
+  font-size: 28px;
+  cursor: pointer;
+  transition: color 0.22s;
+  color: rgb(75, 75, 75);
+}
+.container .fas:hover {
+  color: tomato;
+}
+.container .disabled {
+  color: #ccc;
+}
+.container .disabled:hover {
+  color: #ccc;
 }
 
 

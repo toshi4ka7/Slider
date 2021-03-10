@@ -126,7 +126,16 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
 
-var _init = new WeakSet();
+var config = {
+  count: 3,
+  move: 3
+};
+
+var _Init = new WeakSet();
+
+var _ChangeState = new WeakSet();
+
+var _initState = new WeakSet();
 
 var Slider = /*#__PURE__*/function () {
   function Slider(selector) {
@@ -134,75 +143,113 @@ var Slider = /*#__PURE__*/function () {
 
     _classCallCheck(this, Slider);
 
-    _init.add(this);
+    _initState.add(this);
 
-    this.slider = document.querySelector(selector);
+    _ChangeState.add(this);
 
-    if (this.slider) {
-      _classPrivateMethodGet(this, _init, _init2).call(this, _options);
+    _Init.add(this);
+
+    this.container = document.querySelector(selector);
+
+    if (this.container) {
+      _classPrivateMethodGet(this, _Init, _Init2).call(this, _options);
     } else {
-      console.error("Slider: not element with selector \"".concat(selector, "\""));
+      console.error("Not element with selector = ".concat(this.selector));
     }
   }
 
   _createClass(Slider, [{
-    key: "moveRight",
-    value: function moveRight() {
-      if (this.position <= -this.step * (this.items.length - this.count)) return;
-      this.position -= this.step;
-    }
-  }, {
-    key: "moveLeft",
-    value: function moveLeft() {
-      if (this.position === 0) {
-        return;
+    key: "goTo",
+    value: function goTo(page) {
+      if (page <= 0 || page > this.pages) return;
+      this.page = page;
+
+      if (page === 1) {
+        if (this.controlPrev) this.controlPrev.classList.add('disabled');
+        if (this.controlStart) this.controlStart.classList.add('disabled');
+        if (this.controlNext) this.controlNext.classList.remove('disabled');
+        if (this.controlEnd) this.controlEnd.classList.remove('disabled');
+      } else if (page === this.pages) {
+        if (this.controlPrev) this.controlPrev.classList.remove('disabled');
+        if (this.controlStart) this.controlStart.classList.remove('disabled');
+        if (this.controlNext) this.controlNext.classList.add('disabled');
+        if (this.controlEnd) this.controlEnd.classList.add('disabled');
+      } else {
+        if (this.controlNext) this.controlNext.classList.remove('disabled');
+        if (this.controlPrev) this.controlPrev.classList.remove('disabled');
+        if (this.controlStart) this.controlStart.classList.remove('disabled');
+        if (this.controlEnd) this.controlEnd.classList.remove('disabled');
       }
 
-      this.position += this.step;
+      var position = this.position[page - 1];
+      this.container.style.transform = "translateX(".concat(position, "%)");
     }
   }, {
-    key: "position",
-    get: function get() {
-      return +this.container.style.transform.slice(11, -2);
-    },
-    set: function set(value) {
-      this.container.style.transform = "translateX(".concat(value, "%)");
+    key: "next",
+    value: function next() {
+      this.goTo(this.page + 1);
     }
   }, {
-    key: "count",
-    get: function get() {
-      return this.options.count;
-    },
-    set: function set(value) {
-      this.options.count = value;
-      this.step = 100 / value;
+    key: "prev",
+    value: function prev() {
+      this.goTo(this.page - 1);
+    }
+  }, {
+    key: "start",
+    value: function start() {
+      this.goTo(1);
+    }
+  }, {
+    key: "end",
+    value: function end() {
+      this.goTo(this.pages);
     }
   }]);
 
   return Slider;
 }();
 
-var _init2 = function _init2(options) {
-  this.options = options;
-  this.count = options.count || 2;
-  this.container = this.slider.querySelector('.slider__items');
-  if (!this.container) return console.error('Slider: not element with selector .slider_items');
-  this.controlLeft = this.slider.querySelector('.slider__control--left');
-  if (!this.controlLeft) return console.error('Slider: not element with selector .slider__control--left');
-  this.controlRight = this.slider.querySelector('.slider__control--right');
-  if (!this.controlRight) return console.error('Slider: not element with selector .slider__control--right');
-  this.items = Array.from(this.container.querySelectorAll('.slider__item'));
-  this.controlRight.addEventListener('click', controlRightClickhundler.bind(this));
-  this.controlLeft.addEventListener('click', controlLeftClickHundler.bind(this));
+var _Init2 = function _Init2(options) {
+  this.count = options.count || config.count;
+  this.move = options.move || config.move;
+  this.items = Array.from(this.container.children);
+  this.length = this.items.length;
+  this.controlNext = document.querySelector(options.next);
+  this.controlPrev = document.querySelector(options.prev);
+  this.controlStart = document.querySelector(options.start);
+  this.controlEnd = document.querySelector(options.end);
+  if (this.controlNext) this.controlNext.addEventListener('click', this.next.bind(this));
+  if (this.controlPrev) this.controlPrev.addEventListener('click', this.prev.bind(this));
+  if (this.controlStart) this.controlStart.addEventListener('click', this.start.bind(this));
+  if (this.controlEnd) this.controlEnd.addEventListener('click', this.end.bind(this));
+
+  _classPrivateMethodGet(this, _initState, _initState2).call(this);
+
+  this.page = 1;
+  this.goTo(this.page);
 };
 
-function controlRightClickhundler(e) {
-  this.moveRight();
-}
+var _ChangeState2 = function _ChangeState2() {};
 
-function controlLeftClickHundler(e) {
-  this.moveLeft();
-}
+var _initState2 = function _initState2() {
+  this.pages = Math.ceil((this.length - this.count) / this.move) + 1;
+  this.widthItem = 100 / this.count;
+  this.history = [];
+  this.position = [];
+  var start = 0;
+
+  for (var i = 0; i < this.pages; i++) {
+    var array = this.items.slice(start, start + this.count);
+    this.history.push(array);
+    this.position.push(-i * this.widthItem * this.move);
+    start += this.move;
+  }
+
+  if (this.history[this.history.length - 1].length !== this.count) {
+    this.history[this.history.length - 1] = this.items.slice(-this.count);
+    this.position[this.position.length - 1] = -(this.length - this.count) * this.widthItem;
+  }
+};
 
 module.exports = Slider;
 },{}],"app.js":[function(require,module,exports) {
@@ -212,8 +259,22 @@ var _slider = _interopRequireDefault(require("./slider"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var slider = new _slider.default('.slider', {
-  count: 2
+var slider = new _slider.default('.slider__items', {
+  count: 3,
+  move: 3,
+  prev: '.slider__control-left',
+  next: '.slider__control-right',
+  start: '.slider__control-start',
+  end: '.slider__control-end',
+  media: [{
+    width: 800,
+    count: 2,
+    move: 1
+  }, {
+    width: 500,
+    count: 1,
+    move: 1
+  }]
 });
 window.s = slider;
 },{"./slider":"slider.js"}],"C:/Users/Anton/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
@@ -244,7 +305,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "1689" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "2838" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
