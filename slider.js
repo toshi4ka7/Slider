@@ -1,13 +1,15 @@
-const config = {
+const config = [{
+  width: 0,
   count: 3,
-  move: 3,
-}
+  move: 1,
+}]
 
 class Slider { 
   constructor(selector, options = {}) {
     this.container = document.querySelector(selector)
 
     if (this.container) {
+      this.container.style.transition = 'transform 0.6s'
       this.#Init(options)
     } else {
       console.error(`Not element with selector = ${this.selector}`)
@@ -15,10 +17,8 @@ class Slider {
   }
 
   #Init(options) {
-    this.count = options.count || config.count
-    this.move = options.move || config.move
     this.items = Array.from(this.container.children)
-    this.length = this.items.length
+    this.itemsCount = this.items.length
 
     this.controlNext = document.querySelector(options.next)
     this.controlPrev = document.querySelector(options.prev)
@@ -31,43 +31,74 @@ class Slider {
     if (this.controlEnd) this.controlEnd.addEventListener('click', this.end.bind(this))
 
 
+    this.state = []
+    const state = options.states || config
+    state.forEach((state) => {
+      this.#createState(state.width, state.count, state.move)
+    })
 
-    this.#initState()
-    this.page = 1
-    this.goTo(this.page)
+    this.mediaWidth = this.state.map((state) => {
+      return state.width
+    }).sort((a,b) => a - b)
+
+
+    window.addEventListener('resize', windowHandler.bind(this))
+    window.addEventListener('load', windowHandler.bind(this))
+
+    //this.goToCount(3)
+    //this.goToPage(1)
+
+
+    //this.state = 0
+    //this.page = 1
+    //this.goToPage(this.page)
 
     
-    
-
   
   }
 
-  #ChangeState() {
- 
+  goToCount(count) {
+    const state = this.state.filter((state) => {
+      if (state.count === count) return true
+    })[0]
+
+    this.width = state.width
+    this.history = state.history
+    this.position = state.position
+    this.count = state.count
+    this.move = state.move
+    this.pages = state.pages
+    this.widthItem = state.widthItem
   }
 
 
-  #initState() {
-    this.pages = Math.ceil((this.length - this.count) / this.move) + 1
-    this.widthItem = 100 / this.count
-    this.history = []
-    this.position = []
-
+  #createState(width, count, move) {
+    const state = {}
+    state.history = []
+    state.position = []
+    state.width = width
+    state.count = count
+    state.move = move
+    state.pages = Math.ceil((this.itemsCount - state.count) / state.move) + 1
+    state.widthItem = 100 / state.count
+    
     let start = 0
-    for (let i = 0; i < this.pages; i++) {
-      const array = this.items.slice(start, start + this.count)
-      this.history.push(array)
-      this.position.push(-i * this.widthItem * this.move)
-      start += this.move
+    for (let i = 0; i < state.pages; i++) {
+      const array = this.items.slice(start, start + state.count)
+      state.history.push(array)
+      state.position.push(-i * state.widthItem * state.move)
+      start += state.move
     }
 
-    if (this.history[this.history.length - 1].length !== this.count) {
-      this.history[this.history.length - 1] = this.items.slice(-this.count)
-      this.position[this.position.length - 1] = -(this.length - this.count) * this.widthItem
+    if (state.history[state.history.length - 1].length !== state.count) {
+      state.history[state.history.length - 1] = this.items.slice(-state.count)
+      state.position[state.position.length - 1] = -(this.itemsCount - state.count) * state.widthItem
     }
+
+    this.state.push(state)
   }
 
-  goTo(page) {
+  goToPage(page) {
     if (page <= 0 || page > this.pages) return;
     this.page = page
 
@@ -93,20 +124,20 @@ class Slider {
   }
 
   next() {
-    this.goTo(this.page + 1)
+    this.goToPage(this.page + 1)
   }
 
   prev() {
-    this.goTo(this.page - 1)
+    this.goToPage(this.page - 1)
 
   }
 
   start() {
-    this.goTo(1)
+    this.goToPage(1)
   }
 
   end() {
-    this.goTo(this.pages)
+    this.goToPage(this.pages)
   }
 
 
@@ -115,3 +146,46 @@ class Slider {
 }
 
 module.exports = Slider
+
+function windowHandler(e) {
+  const windowWidth = window.innerWidth
+
+  const width = this.mediaWidth.filter((width) => {
+    if (width >= windowWidth) return true
+  })[0]
+
+  const count = this.state.filter((state) => {
+    if (state.width === width) return true
+  })[0].count
+
+
+  if (e.type === 'load') {
+    this.goToCount(count)
+    this.goToPage(1)
+    return
+  }
+
+  if (count === this.count) return
+
+
+  const elem = this.history[this.page - 1][0]
+  this.goToCount(count)
+
+  this.history.forEach((array, index) => {
+    if (array.includes(elem)) {
+      console.log(index + 1)
+      this.container.style.transition = 'none'
+      this.goToPage(index + 1)
+      setTimeout(() => {
+        this.container.style.transition = 'transform 0.6s'
+      }, 0)
+      
+      return
+    }
+  })
+
+
+
+
+  //this.goToPage(1)
+}

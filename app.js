@@ -1,13 +1,16 @@
 import Slider from './slider'
 
 const slider = new Slider('.slider__items', {
-  count: 3,
-  move: 3,
   prev: '.slider__control-left',
   next: '.slider__control-right',
   start: '.slider__control-start',
   end: '.slider__control-end',
-  media: [
+  states: [
+    {
+      width: 5000,
+      count: 3,
+      move: 3
+    },
     {
       width: 800,
       count: 2,

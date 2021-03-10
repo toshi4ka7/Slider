@@ -126,16 +126,15 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
 
-var config = {
+var config = [{
+  width: 0,
   count: 3,
-  move: 3
-};
+  move: 1
+}];
 
 var _Init = new WeakSet();
 
-var _ChangeState = new WeakSet();
-
-var _initState = new WeakSet();
+var _createState = new WeakSet();
 
 var Slider = /*#__PURE__*/function () {
   function Slider(selector) {
@@ -143,15 +142,15 @@ var Slider = /*#__PURE__*/function () {
 
     _classCallCheck(this, Slider);
 
-    _initState.add(this);
-
-    _ChangeState.add(this);
+    _createState.add(this);
 
     _Init.add(this);
 
     this.container = document.querySelector(selector);
 
     if (this.container) {
+      this.container.style.transition = 'transform 0.6s';
+
       _classPrivateMethodGet(this, _Init, _Init2).call(this, _options);
     } else {
       console.error("Not element with selector = ".concat(this.selector));
@@ -159,8 +158,22 @@ var Slider = /*#__PURE__*/function () {
   }
 
   _createClass(Slider, [{
-    key: "goTo",
-    value: function goTo(page) {
+    key: "goToCount",
+    value: function goToCount(count) {
+      var state = this.state.filter(function (state) {
+        if (state.count === count) return true;
+      })[0];
+      this.width = state.width;
+      this.history = state.history;
+      this.position = state.position;
+      this.count = state.count;
+      this.move = state.move;
+      this.pages = state.pages;
+      this.widthItem = state.widthItem;
+    }
+  }, {
+    key: "goToPage",
+    value: function goToPage(page) {
       if (page <= 0 || page > this.pages) return;
       this.page = page;
 
@@ -187,22 +200,22 @@ var Slider = /*#__PURE__*/function () {
   }, {
     key: "next",
     value: function next() {
-      this.goTo(this.page + 1);
+      this.goToPage(this.page + 1);
     }
   }, {
     key: "prev",
     value: function prev() {
-      this.goTo(this.page - 1);
+      this.goToPage(this.page - 1);
     }
   }, {
     key: "start",
     value: function start() {
-      this.goTo(1);
+      this.goToPage(1);
     }
   }, {
     key: "end",
     value: function end() {
-      this.goTo(this.pages);
+      this.goToPage(this.pages);
     }
   }]);
 
@@ -210,10 +223,10 @@ var Slider = /*#__PURE__*/function () {
 }();
 
 var _Init2 = function _Init2(options) {
-  this.count = options.count || config.count;
-  this.move = options.move || config.move;
+  var _this2 = this;
+
   this.items = Array.from(this.container.children);
-  this.length = this.items.length;
+  this.itemsCount = this.items.length;
   this.controlNext = document.querySelector(options.next);
   this.controlPrev = document.querySelector(options.prev);
   this.controlStart = document.querySelector(options.start);
@@ -222,36 +235,86 @@ var _Init2 = function _Init2(options) {
   if (this.controlPrev) this.controlPrev.addEventListener('click', this.prev.bind(this));
   if (this.controlStart) this.controlStart.addEventListener('click', this.start.bind(this));
   if (this.controlEnd) this.controlEnd.addEventListener('click', this.end.bind(this));
-
-  _classPrivateMethodGet(this, _initState, _initState2).call(this);
-
-  this.page = 1;
-  this.goTo(this.page);
+  this.state = [];
+  var state = options.states || config;
+  state.forEach(function (state) {
+    _classPrivateMethodGet(_this2, _createState, _createState2).call(_this2, state.width, state.count, state.move);
+  });
+  this.mediaWidth = this.state.map(function (state) {
+    return state.width;
+  }).sort(function (a, b) {
+    return a - b;
+  });
+  window.addEventListener('resize', windowHandler.bind(this));
+  window.addEventListener('load', windowHandler.bind(this)); //this.goToCount(3)
+  //this.goToPage(1)
+  //this.state = 0
+  //this.page = 1
+  //this.goToPage(this.page)
 };
 
-var _ChangeState2 = function _ChangeState2() {};
-
-var _initState2 = function _initState2() {
-  this.pages = Math.ceil((this.length - this.count) / this.move) + 1;
-  this.widthItem = 100 / this.count;
-  this.history = [];
-  this.position = [];
+var _createState2 = function _createState2(width, count, move) {
+  var state = {};
+  state.history = [];
+  state.position = [];
+  state.width = width;
+  state.count = count;
+  state.move = move;
+  state.pages = Math.ceil((this.itemsCount - state.count) / state.move) + 1;
+  state.widthItem = 100 / state.count;
   var start = 0;
 
-  for (var i = 0; i < this.pages; i++) {
-    var array = this.items.slice(start, start + this.count);
-    this.history.push(array);
-    this.position.push(-i * this.widthItem * this.move);
-    start += this.move;
+  for (var i = 0; i < state.pages; i++) {
+    var array = this.items.slice(start, start + state.count);
+    state.history.push(array);
+    state.position.push(-i * state.widthItem * state.move);
+    start += state.move;
   }
 
-  if (this.history[this.history.length - 1].length !== this.count) {
-    this.history[this.history.length - 1] = this.items.slice(-this.count);
-    this.position[this.position.length - 1] = -(this.length - this.count) * this.widthItem;
+  if (state.history[state.history.length - 1].length !== state.count) {
+    state.history[state.history.length - 1] = this.items.slice(-state.count);
+    state.position[state.position.length - 1] = -(this.itemsCount - state.count) * state.widthItem;
   }
+
+  this.state.push(state);
 };
 
 module.exports = Slider;
+
+function windowHandler(e) {
+  var _this = this;
+
+  var windowWidth = window.innerWidth;
+  var width = this.mediaWidth.filter(function (width) {
+    if (width >= windowWidth) return true;
+  })[0];
+  var count = this.state.filter(function (state) {
+    if (state.width === width) return true;
+  })[0].count;
+
+  if (e.type === 'load') {
+    this.goToCount(count);
+    this.goToPage(1);
+    return;
+  }
+
+  if (count === this.count) return;
+  var elem = this.history[this.page - 1][0];
+  this.goToCount(count);
+  this.history.forEach(function (array, index) {
+    if (array.includes(elem)) {
+      console.log(index + 1);
+      _this.container.style.transition = 'none';
+
+      _this.goToPage(index + 1);
+
+      setTimeout(function () {
+        _this.container.style.transition = 'transform 0.6s';
+      }, 0);
+      return;
+    }
+  }); //this.goToPage(1)
+}
 },{}],"app.js":[function(require,module,exports) {
 "use strict";
 
@@ -260,13 +323,15 @@ var _slider = _interopRequireDefault(require("./slider"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var slider = new _slider.default('.slider__items', {
-  count: 3,
-  move: 3,
   prev: '.slider__control-left',
   next: '.slider__control-right',
   start: '.slider__control-start',
   end: '.slider__control-end',
-  media: [{
+  states: [{
+    width: 5000,
+    count: 3,
+    move: 3
+  }, {
     width: 800,
     count: 2,
     move: 1
@@ -277,7 +342,7 @@ var slider = new _slider.default('.slider__items', {
   }]
 });
 window.s = slider;
-},{"./slider":"slider.js"}],"C:/Users/Anton/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./slider":"slider.js"}],"C:/Users/User/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -305,7 +370,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "2838" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49672" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -481,5 +546,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["C:/Users/Anton/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","app.js"], null)
+},{}]},{},["C:/Users/User/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","app.js"], null)
 //# sourceMappingURL=/app.c328ef1a.js.map
