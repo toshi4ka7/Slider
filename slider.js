@@ -50,6 +50,10 @@ class Slider {
       return state.width
     }).sort((a,b) => a - b)
 
+    if (options.loop) {
+      this.loopDirection = 'next'
+      setInterval(loopHundler.bind(this), options.loop)
+    }
 
     window.addEventListener('resize', windowHandler.bind(this))
     window.addEventListener('load', windowHandler.bind(this))
@@ -175,7 +179,6 @@ class Slider {
       this.history[this.page - 1][0].classList.add('left')
       this.history[this.page - 1][this.history[this.page - 1].length - 1].classList.add('right')
     }
-    
   }
 
   next() {
@@ -245,4 +248,22 @@ function paginationHandler(e) {
   if (!this.paginationOptions.link) return
   const page = +e.target.getAttribute('data-id')
   this.goToPage(page)
+}
+
+function loopHundler() {
+  if (this.loopDirection === 'next') {
+    if (this.page + 1 > this.pages) {
+      this.goToPage(this.page - 1)
+      this.loopDirection = 'prev'
+    } else {
+      this.goToPage(this.page + 1)
+    }
+  } else {
+    if (this.page === 1) {
+      this.goToPage(2)
+      this.loopDirection = 'next'
+    } else {
+      this.goToPage(this.page - 1)
+    }
+  }
 }

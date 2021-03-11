@@ -314,6 +314,12 @@ var _Init2 = function _Init2(options) {
   }).sort(function (a, b) {
     return a - b;
   });
+
+  if (options.loop) {
+    this.loopDirection = 'next';
+    setInterval(loopHundler.bind(this), options.loop);
+  }
+
   window.addEventListener('resize', windowHandler.bind(this));
   window.addEventListener('load', windowHandler.bind(this));
   this.pagination ? this.pagination.addEventListener('click', paginationHandler.bind(this)) : null;
@@ -388,6 +394,24 @@ function paginationHandler(e) {
   var page = +e.target.getAttribute('data-id');
   this.goToPage(page);
 }
+
+function loopHundler() {
+  if (this.loopDirection === 'next') {
+    if (this.page + 1 > this.pages) {
+      this.goToPage(this.page - 1);
+      this.loopDirection = 'prev';
+    } else {
+      this.goToPage(this.page + 1);
+    }
+  } else {
+    if (this.page === 1) {
+      this.goToPage(2);
+      this.loopDirection = 'next';
+    } else {
+      this.goToPage(this.page - 1);
+    }
+  }
+}
 },{}],"app.js":[function(require,module,exports) {
 "use strict";
 
@@ -396,10 +420,11 @@ var _slider = _interopRequireDefault(require("./slider"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var slider = new _slider.default('.slider__items', {
-  class: false,
+  //loop: 2000,
+  class: true,
   pagination: {
     selector: '.pagination',
-    number: false,
+    number: true,
     link: true
   },
   prev: '.slider__control-left',
@@ -455,7 +480,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54498" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49330" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
