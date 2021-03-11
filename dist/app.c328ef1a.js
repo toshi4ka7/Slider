@@ -129,8 +129,7 @@ function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(
 var config = [{
   width: 0,
   count: 3,
-  move: 1,
-  class: false
+  move: 1
 }];
 
 var _Init = new WeakSet();
@@ -196,6 +195,23 @@ var Slider = /*#__PURE__*/function () {
       var position = this.position[page - 1];
       this.class ? this.addClass() : null;
       this.container.style.transform = "translateX(".concat(position, "%)");
+      this.veiwPage ? this.veiwPage.textContent = this.page : null;
+      this.veiwPages ? this.veiwPages.textContent = this.pages : null;
+      if (this.paginationOptions) this.createPagination();
+    }
+  }, {
+    key: "createPagination",
+    value: function createPagination() {
+      this.pagination = document.querySelector(this.paginationOptions.selector);
+      var item = this.pagination.children[0];
+      this.pagination.innerHTML = '';
+      var fragment = document.createDocumentFragment();
+
+      for (var i = 0; i < this.pages; i++) {
+        fragment.append(item);
+      }
+
+      this.pagination.append(fragment);
     }
   }, {
     key: "addClass",
@@ -241,11 +257,14 @@ var _Init2 = function _Init2(options) {
   this.items = Array.from(this.container.children);
   this.itemsCount = this.items.length;
   this.container.style.transition = 'transform 0.6s';
-  this.class = options.class || config.class;
+  this.class = options.class || false;
   this.controlNext = document.querySelector(options.next);
   this.controlPrev = document.querySelector(options.prev);
   this.controlStart = document.querySelector(options.start);
   this.controlEnd = document.querySelector(options.end);
+  this.veiwPage = document.querySelector(options.page);
+  this.veiwPages = document.querySelector(options.pages);
+  options.pagination ? this.paginationOptions = options.pagination : null;
   if (this.controlNext) this.controlNext.addEventListener('click', this.next.bind(this));
   if (this.controlPrev) this.controlPrev.addEventListener('click', this.prev.bind(this));
   if (this.controlStart) this.controlStart.addEventListener('click', this.start.bind(this));
@@ -333,11 +352,18 @@ var _slider = _interopRequireDefault(require("./slider"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var slider = new _slider.default('.slider__items', {
-  //class: true,
+  class: true,
+  pagination: {
+    selector: '.pagination',
+    number: false,
+    link: false
+  },
   prev: '.slider__control-left',
   next: '.slider__control-right',
   start: '.slider__control-start',
   end: '.slider__control-end',
+  page: '.page',
+  pages: '.pages',
   states: [{
     width: 5000,
     count: 4,

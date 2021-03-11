@@ -2,7 +2,6 @@ const config = [{
   width: 0,
   count: 3,
   move: 1,
-  class: false,
 }]
 
 class Slider { 
@@ -21,12 +20,15 @@ class Slider {
     this.itemsCount = this.items.length
 
     this.container.style.transition = 'transform 0.6s'
-    this.class = options.class || config.class
+    this.class = options.class || false
 
     this.controlNext = document.querySelector(options.next)
     this.controlPrev = document.querySelector(options.prev)
     this.controlStart = document.querySelector(options.start)
     this.controlEnd = document.querySelector(options.end)
+    this.veiwPage = document.querySelector(options.page)
+    this.veiwPages = document.querySelector(options.pages)
+    options.pagination ? this.paginationOptions = options.pagination : null
 
     if (this.controlNext) this.controlNext.addEventListener('click', this.next.bind(this))
     if (this.controlPrev) this.controlPrev.addEventListener('click', this.prev.bind(this))
@@ -48,8 +50,6 @@ class Slider {
     window.addEventListener('resize', windowHandler.bind(this))
     window.addEventListener('load', windowHandler.bind(this))
 
-    
-  
   }
 
   goToCount(count) {
@@ -117,6 +117,22 @@ class Slider {
     const position = this.position[page - 1]
     this.class ? this.addClass() : null
     this.container.style.transform = `translateX(${position}%)`
+    this.veiwPage ? this.veiwPage.textContent = this.page : null
+    this.veiwPages ? this.veiwPages.textContent = this.pages : null
+    if (this.paginationOptions) this.createPagination()
+  }
+
+  createPagination() {
+    this.pagination = document.querySelector(this.paginationOptions.selector)
+    const item = this.pagination.children[0]
+    this.pagination.innerHTML = ''
+
+    const fragment = document.createDocumentFragment()
+    for (let i = 0; i < this.pages; i++) {
+      fragment.append(item)
+    }
+
+    this.pagination.append(fragment)
   }
 
   addClass() {
