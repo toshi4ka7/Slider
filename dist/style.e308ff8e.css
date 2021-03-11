@@ -116,8 +116,10 @@ body {
   background-color: #ccc;
   transition: all 0.3s;
   margin: 0 5px;
+  cursor: pointer;
 }
-.pagination__item.active {
+.pagination__item.active,
+.pagination__item:hover {
   background-color: tomato;
 }
 

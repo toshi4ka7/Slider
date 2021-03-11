@@ -28,7 +28,11 @@ class Slider {
     this.controlEnd = document.querySelector(options.end)
     this.veiwPage = document.querySelector(options.page)
     this.veiwPages = document.querySelector(options.pages)
-    options.pagination ? this.paginationOptions = options.pagination : null
+
+    if (options.pagination) {
+      this.paginationOptions = options.pagination
+      this.pagination = document.querySelector(this.paginationOptions.selector)
+    }
 
     if (this.controlNext) this.controlNext.addEventListener('click', this.next.bind(this))
     if (this.controlPrev) this.controlPrev.addEventListener('click', this.prev.bind(this))
@@ -49,6 +53,7 @@ class Slider {
 
     window.addEventListener('resize', windowHandler.bind(this))
     window.addEventListener('load', windowHandler.bind(this))
+    this.pagination ? this.pagination.addEventListener('click', paginationHandler.bind(this)) : null
 
   }
 
@@ -119,7 +124,33 @@ class Slider {
     this.container.style.transform = `translateX(${position}%)`
     this.veiwPage ? this.veiwPage.textContent = this.page : null
     this.veiwPages ? this.veiwPages.textContent = this.pages : null
-    if (this.paginationOptions) this.createPagination()
+    if (this.pagination) this.changePagination()
+  }
+
+  changePagination() {
+    Array.from(this.pagination.children).forEach((elem, index) => {
+      if (index + 1 === this.page) {
+        elem.classList.add('active')
+      } else {
+        elem.classList.remove('active')
+      }
+    })
+  }
+
+  renderPagination() {
+    this.pagination.innerHTML = ''
+
+    const fragment = document.createDocumentFragment()
+    for (let i = 0; i < this.pages; i++) {
+      const item = document.createElement('div')
+      item.classList.add(`${this.paginationOptions.selector.slice(1)}__item`)
+      item.setAttribute('data-id', i + 1)
+      if (this.paginationOptions.number) item.textContent = i + 1
+      fragment.append(item)
+    }
+
+    this.pagination.append(fragment)
+    this.changePagination()
   }
 
   createPagination() {
@@ -186,6 +217,7 @@ function windowHandler(e) {
   if (e.type === 'load') {
     this.goToCount(count)
     this.goToPage(1)
+    this.pagination ? this.renderPagination() : null
     return
   }
 
@@ -199,6 +231,7 @@ function windowHandler(e) {
     if (array.includes(elem)) {
       this.container.style.transition = 'none'
       this.goToPage(index + 1)
+      this.pagination ? this.renderPagination() : null
       setTimeout(() => {
         this.container.style.transition = 'transform 0.6s'
       }, 0)
@@ -206,9 +239,10 @@ function windowHandler(e) {
       return
     }
   })
+}
 
-
-
-
-  //this.goToPage(1)
+function paginationHandler(e) {
+  if (!this.paginationOptions.link) return
+  const page = +e.target.getAttribute('data-id')
+  this.goToPage(page)
 }

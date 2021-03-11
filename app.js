@@ -1,11 +1,11 @@
 import Slider from './slider'
 
 const slider = new Slider('.slider__items', {
-  class: true,
+  class: false,
   pagination: {
     selector: '.pagination',
     number: false,
-    link: false
+    link: true
   },
   prev: '.slider__control-left',
   next: '.slider__control-right',

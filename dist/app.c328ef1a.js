@@ -197,7 +197,37 @@ var Slider = /*#__PURE__*/function () {
       this.container.style.transform = "translateX(".concat(position, "%)");
       this.veiwPage ? this.veiwPage.textContent = this.page : null;
       this.veiwPages ? this.veiwPages.textContent = this.pages : null;
-      if (this.paginationOptions) this.createPagination();
+      if (this.pagination) this.changePagination();
+    }
+  }, {
+    key: "changePagination",
+    value: function changePagination() {
+      var _this = this;
+
+      Array.from(this.pagination.children).forEach(function (elem, index) {
+        if (index + 1 === _this.page) {
+          elem.classList.add('active');
+        } else {
+          elem.classList.remove('active');
+        }
+      });
+    }
+  }, {
+    key: "renderPagination",
+    value: function renderPagination() {
+      this.pagination.innerHTML = '';
+      var fragment = document.createDocumentFragment();
+
+      for (var i = 0; i < this.pages; i++) {
+        var item = document.createElement('div');
+        item.classList.add("".concat(this.paginationOptions.selector.slice(1), "__item"));
+        item.setAttribute('data-id', i + 1);
+        if (this.paginationOptions.number) item.textContent = i + 1;
+        fragment.append(item);
+      }
+
+      this.pagination.append(fragment);
+      this.changePagination();
     }
   }, {
     key: "createPagination",
@@ -252,7 +282,7 @@ var Slider = /*#__PURE__*/function () {
 }();
 
 var _Init2 = function _Init2(options) {
-  var _this2 = this;
+  var _this3 = this;
 
   this.items = Array.from(this.container.children);
   this.itemsCount = this.items.length;
@@ -264,7 +294,12 @@ var _Init2 = function _Init2(options) {
   this.controlEnd = document.querySelector(options.end);
   this.veiwPage = document.querySelector(options.page);
   this.veiwPages = document.querySelector(options.pages);
-  options.pagination ? this.paginationOptions = options.pagination : null;
+
+  if (options.pagination) {
+    this.paginationOptions = options.pagination;
+    this.pagination = document.querySelector(this.paginationOptions.selector);
+  }
+
   if (this.controlNext) this.controlNext.addEventListener('click', this.next.bind(this));
   if (this.controlPrev) this.controlPrev.addEventListener('click', this.prev.bind(this));
   if (this.controlStart) this.controlStart.addEventListener('click', this.start.bind(this));
@@ -272,7 +307,7 @@ var _Init2 = function _Init2(options) {
   this.state = [];
   var state = options.states || config;
   state.forEach(function (state) {
-    _classPrivateMethodGet(_this2, _createState, _createState2).call(_this2, state.width, state.count, state.move);
+    _classPrivateMethodGet(_this3, _createState, _createState2).call(_this3, state.width, state.count, state.move);
   });
   this.mediaWidth = this.state.map(function (state) {
     return state.width;
@@ -281,6 +316,7 @@ var _Init2 = function _Init2(options) {
   });
   window.addEventListener('resize', windowHandler.bind(this));
   window.addEventListener('load', windowHandler.bind(this));
+  this.pagination ? this.pagination.addEventListener('click', paginationHandler.bind(this)) : null;
 };
 
 var _createState2 = function _createState2(width, count, move) {
@@ -312,7 +348,7 @@ var _createState2 = function _createState2(width, count, move) {
 module.exports = Slider;
 
 function windowHandler(e) {
-  var _this = this;
+  var _this2 = this;
 
   var windowWidth = window.innerWidth;
   var width = this.mediaWidth.filter(function (width) {
@@ -325,6 +361,7 @@ function windowHandler(e) {
   if (e.type === 'load') {
     this.goToCount(count);
     this.goToPage(1);
+    this.pagination ? this.renderPagination() : null;
     return;
   }
 
@@ -333,16 +370,23 @@ function windowHandler(e) {
   this.goToCount(count);
   this.history.forEach(function (array, index) {
     if (array.includes(elem)) {
-      _this.container.style.transition = 'none';
+      _this2.container.style.transition = 'none';
 
-      _this.goToPage(index + 1);
+      _this2.goToPage(index + 1);
 
+      _this2.pagination ? _this2.renderPagination() : null;
       setTimeout(function () {
-        _this.container.style.transition = 'transform 0.6s';
+        _this2.container.style.transition = 'transform 0.6s';
       }, 0);
       return;
     }
-  }); //this.goToPage(1)
+  });
+}
+
+function paginationHandler(e) {
+  if (!this.paginationOptions.link) return;
+  var page = +e.target.getAttribute('data-id');
+  this.goToPage(page);
 }
 },{}],"app.js":[function(require,module,exports) {
 "use strict";
@@ -352,11 +396,11 @@ var _slider = _interopRequireDefault(require("./slider"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var slider = new _slider.default('.slider__items', {
-  class: true,
+  class: false,
   pagination: {
     selector: '.pagination',
     number: false,
-    link: false
+    link: true
   },
   prev: '.slider__control-left',
   next: '.slider__control-right',
@@ -383,7 +427,7 @@ var slider = new _slider.default('.slider__items', {
   }]
 });
 window.s = slider;
-},{"./slider":"slider.js"}],"C:/Users/Anton/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./slider":"slider.js"}],"C:/Users/User/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -411,7 +455,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "2526" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54498" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -587,5 +631,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["C:/Users/Anton/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","app.js"], null)
+},{}]},{},["C:/Users/User/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","app.js"], null)
 //# sourceMappingURL=/app.c328ef1a.js.map
