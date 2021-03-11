@@ -2,6 +2,7 @@ const config = [{
   width: 0,
   count: 3,
   move: 1,
+  class: false,
 }]
 
 class Slider { 
@@ -9,7 +10,6 @@ class Slider {
     this.container = document.querySelector(selector)
 
     if (this.container) {
-      this.container.style.transition = 'transform 0.6s'
       this.#Init(options)
     } else {
       console.error(`Not element with selector = ${this.selector}`)
@@ -19,6 +19,9 @@ class Slider {
   #Init(options) {
     this.items = Array.from(this.container.children)
     this.itemsCount = this.items.length
+
+    this.container.style.transition = 'transform 0.6s'
+    this.class = options.class || config.class
 
     this.controlNext = document.querySelector(options.next)
     this.controlPrev = document.querySelector(options.prev)
@@ -44,14 +47,6 @@ class Slider {
 
     window.addEventListener('resize', windowHandler.bind(this))
     window.addEventListener('load', windowHandler.bind(this))
-
-    //this.goToCount(3)
-    //this.goToPage(1)
-
-
-    //this.state = 0
-    //this.page = 1
-    //this.goToPage(this.page)
 
     
   
@@ -120,7 +115,20 @@ class Slider {
     }
 
     const position = this.position[page - 1]
+    this.class ? this.addClass() : null
     this.container.style.transform = `translateX(${position}%)`
+  }
+
+  addClass() {
+    this.items.forEach((elem) => {
+      elem.classList.remove('right')
+      elem.classList.remove('left')
+    })
+    if (this.count >= 2) {
+      this.history[this.page - 1][0].classList.add('left')
+      this.history[this.page - 1][this.history[this.page - 1].length - 1].classList.add('right')
+    }
+    
   }
 
   next() {
@@ -173,7 +181,6 @@ function windowHandler(e) {
 
   this.history.forEach((array, index) => {
     if (array.includes(elem)) {
-      console.log(index + 1)
       this.container.style.transition = 'none'
       this.goToPage(index + 1)
       setTimeout(() => {

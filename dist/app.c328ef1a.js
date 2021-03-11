@@ -129,7 +129,8 @@ function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(
 var config = [{
   width: 0,
   count: 3,
-  move: 1
+  move: 1,
+  class: false
 }];
 
 var _Init = new WeakSet();
@@ -149,8 +150,6 @@ var Slider = /*#__PURE__*/function () {
     this.container = document.querySelector(selector);
 
     if (this.container) {
-      this.container.style.transition = 'transform 0.6s';
-
       _classPrivateMethodGet(this, _Init, _Init2).call(this, _options);
     } else {
       console.error("Not element with selector = ".concat(this.selector));
@@ -195,7 +194,21 @@ var Slider = /*#__PURE__*/function () {
       }
 
       var position = this.position[page - 1];
+      this.class ? this.addClass() : null;
       this.container.style.transform = "translateX(".concat(position, "%)");
+    }
+  }, {
+    key: "addClass",
+    value: function addClass() {
+      this.items.forEach(function (elem) {
+        elem.classList.remove('right');
+        elem.classList.remove('left');
+      });
+
+      if (this.count >= 2) {
+        this.history[this.page - 1][0].classList.add('left');
+        this.history[this.page - 1][this.history[this.page - 1].length - 1].classList.add('right');
+      }
     }
   }, {
     key: "next",
@@ -227,6 +240,8 @@ var _Init2 = function _Init2(options) {
 
   this.items = Array.from(this.container.children);
   this.itemsCount = this.items.length;
+  this.container.style.transition = 'transform 0.6s';
+  this.class = options.class || config.class;
   this.controlNext = document.querySelector(options.next);
   this.controlPrev = document.querySelector(options.prev);
   this.controlStart = document.querySelector(options.start);
@@ -246,11 +261,7 @@ var _Init2 = function _Init2(options) {
     return a - b;
   });
   window.addEventListener('resize', windowHandler.bind(this));
-  window.addEventListener('load', windowHandler.bind(this)); //this.goToCount(3)
-  //this.goToPage(1)
-  //this.state = 0
-  //this.page = 1
-  //this.goToPage(this.page)
+  window.addEventListener('load', windowHandler.bind(this));
 };
 
 var _createState2 = function _createState2(width, count, move) {
@@ -303,7 +314,6 @@ function windowHandler(e) {
   this.goToCount(count);
   this.history.forEach(function (array, index) {
     if (array.includes(elem)) {
-      console.log(index + 1);
       _this.container.style.transition = 'none';
 
       _this.goToPage(index + 1);
@@ -323,18 +333,23 @@ var _slider = _interopRequireDefault(require("./slider"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var slider = new _slider.default('.slider__items', {
+  //class: true,
   prev: '.slider__control-left',
   next: '.slider__control-right',
   start: '.slider__control-start',
   end: '.slider__control-end',
   states: [{
     width: 5000,
+    count: 4,
+    move: 1
+  }, {
+    width: 1200,
     count: 3,
-    move: 3
+    move: 1
   }, {
     width: 800,
     count: 2,
-    move: 1
+    move: 2
   }, {
     width: 500,
     count: 1,
@@ -342,7 +357,7 @@ var slider = new _slider.default('.slider__items', {
   }]
 });
 window.s = slider;
-},{"./slider":"slider.js"}],"C:/Users/User/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./slider":"slider.js"}],"C:/Users/Anton/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -370,7 +385,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49672" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "2526" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -546,5 +561,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["C:/Users/User/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","app.js"], null)
+},{}]},{},["C:/Users/Anton/AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","app.js"], null)
 //# sourceMappingURL=/app.c328ef1a.js.map

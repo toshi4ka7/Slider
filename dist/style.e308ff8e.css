@@ -8,7 +8,7 @@ body {
   font-family: "Roboto", sans-serif;
 }
 .wrapper {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   margin-top: 50px;
 }
@@ -31,14 +31,20 @@ body {
   height: 100%;
 }
 .slider__item {
-  flex: 0 0 33.3333%;
-  max-width: 33.3333%;
+  flex: 0 0 25%;
+  max-width: 25%;
   background-color: rgb(67, 152, 250);
 }
 .slider__item:nth-child(2n + 1) {
   background-color: rgb(150, 197, 252);
 }
 
+@media only screen and (max-width: 1200px) {
+  .slider__item {
+    flex: 0 0 33.3333%;
+    max-width: 33.3333%;
+  }
+}
 @media only screen and (max-width: 800px) {
   .slider__item {
     flex: 0 0 50%;
@@ -60,6 +66,12 @@ body {
   font-size: 80px;
   font-weight: bold;
   color: #fff;
+}
+.left {
+  justify-content: flex-start;
+}
+.right {
+  justify-content: flex-end;
 }
 
 /* Buttons slider controls */
@@ -108,13 +120,14 @@ body {
 
 .container {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   margin-top: 50px;
 }
 .container .fas {
   font-size: 28px;
   cursor: pointer;
   transition: color 0.22s;
+  margin: 0 50px;
   color: rgb(75, 75, 75);
 }
 .container .fas:hover {

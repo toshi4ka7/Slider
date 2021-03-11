@@ -1,6 +1,7 @@
 import Slider from './slider'
 
 const slider = new Slider('.slider__items', {
+  //class: true,
   prev: '.slider__control-left',
   next: '.slider__control-right',
   start: '.slider__control-start',
@@ -8,13 +9,18 @@ const slider = new Slider('.slider__items', {
   states: [
     {
       width: 5000,
+      count: 4,
+      move: 1
+    },
+    {
+      width: 1200,
       count: 3,
-      move: 3
+      move: 1
     },
     {
       width: 800,
       count: 2,
-      move: 1
+      move: 2
     },
     {
       width: 500,
